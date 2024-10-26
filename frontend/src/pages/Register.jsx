@@ -6,6 +6,7 @@ import { TextField, Button, Typography, Card, CardContent, Box, Alert } from '@m
 function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
@@ -16,12 +17,12 @@ function Register() {
 
     // Validate password length
     if (password.length < 7) {
-      setErrorMessage('Password should be at least 7 characters.(Thala for a reason😎)');
+      setErrorMessage('Password should be at least 7 characters.');
       return; // Stop form submission if validation fails
     }
 
     try {
-      await axios.post('http://localhost:5000/api/users/register', { name, email, password });
+      await axios.post('http://localhost:5000/api/users/register', { name, email, username, password });
       // Redirect to the dashboard after successful registration
       navigate('/dashboard');
     } catch (error) {
@@ -31,9 +32,9 @@ function Register() {
         } else {
           setErrorMessage('An error occurred. Please try again.');
         }
-        console.error('Error response data:', error.response.data);
       } else {
         console.error('Unexpected error:', error);
+        setErrorMessage('Network error. Please try again.');
       }
     }
   };
@@ -65,16 +66,50 @@ function Register() {
           <Typography variant="h4" component="h1" gutterBottom align="center" style={{ fontWeight: 'bold', color: '#1976d2' }}>
             Register
           </Typography>
-          <Typography variant="body1" align="center" gutterBottom style={{ marginBottom: '20px', color: 'gray' }}>
-            Create your account to manage the inventory
-          </Typography>
           <form onSubmit={handleSubmit}>
             <Box display="flex" flexDirection="column" gap={2} mb={3}>
-              <TextField label="Name" variant="outlined" fullWidth value={name} onChange={(e) => setName(e.target.value)} required />
-              <TextField label="Email" variant="outlined" fullWidth type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <TextField label="Password" variant="outlined" fullWidth type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <TextField
+                label="Name"
+                variant="outlined"
+                fullWidth
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+              <TextField
+                label="Email"
+                variant="outlined"
+                fullWidth
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <TextField
+                label="Username"
+                variant="outlined"
+                fullWidth
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+              <TextField
+                label="Password"
+                variant="outlined"
+                fullWidth
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
               {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-              <Button type="submit" variant="contained" color="primary" fullWidth style={{ padding: '12px', fontWeight: 'bold' }}>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                style={{ padding: '12px', fontWeight: 'bold' }}
+              >
                 Register
               </Button>
             </Box>

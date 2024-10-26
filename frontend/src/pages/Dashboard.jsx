@@ -113,101 +113,82 @@ function Dashboard() {
         minHeight: '100vh',
         width: '100vw',
         backgroundColor: '#f0f2f5',
-        padding: '0', // Remove padding
-        margin: '0', // Remove margin
+        padding: '0',
+        margin: '0',
       }}
     >
-      <Card
-        elevation={5}
-        sx={{
-          padding: '30px',
-          borderRadius: '15px',
-          width: '100%',
-          maxWidth: '600px',
-          backgroundColor: '#ffffff',
-          boxShadow: 3, // Add a subtle shadow for better visual separation
-        }}
-      >
-        <CardContent>
-          <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-            Product Management
-          </Typography>
-          {message && <Alert severity="info">{message}</Alert>}
-          <Box display="flex" flexDirection="column" gap={2}>
+      <Box sx={{ maxWidth: '500px', width: '100%', padding: 2 }}>
+        <Typography variant="h4" align="center">Product Dashboard</Typography>
+        {message && <Alert severity="info">{message}</Alert>}
+        <Card sx={{ marginBottom: 2 }}>
+          <CardContent>
             <TextField
               label="Product Name"
               variant="outlined"
+              fullWidth
+              margin="normal"
               value={newProduct.name}
               onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-              required
             />
             <TextField
               label="Price"
-              type="number"
               variant="outlined"
+              fullWidth
+              margin="normal"
+              type="number"
               value={newProduct.price}
-              onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-              required
+              onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
             />
             <TextField
               label="Quantity"
-              type="number"
               variant="outlined"
+              fullWidth
+              margin="normal"
+              type="number"
               value={newProduct.quantity}
-              onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}
-              required
+              onChange={(e) => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })}
             />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleAddProduct}
-              sx={{ padding: '12px', fontWeight: 'bold' }}
-            >
-              Add Product
+            <Button onClick={editingProduct ? handleUpdateProduct : handleAddProduct} variant="contained" fullWidth>
+              {editingProduct ? 'Update Product' : 'Add Product'}
             </Button>
-            {editingProduct && (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleUpdateProduct}
-                sx={{ padding: '12px', fontWeight: 'bold' }}
-              >
-                Update Product
-              </Button>
-            )}
-            <FormControl fullWidth>
-              <InputLabel>Select Product</InputLabel>
-              <Select value={selectedProduct} onChange={handleProductSelect}>
-                {products.map((product) => (
-                  <MenuItem key={product._id} value={product._id}>
-                    {product.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => setOpenDeleteDialog(true)}
-              sx={{ padding: '12px', fontWeight: 'bold' }}
-            >
-              Delete Product
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
-      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete this product?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)} color="primary">Cancel</Button>
-          <Button onClick={handleDeleteProduct} color="secondary">Delete</Button>
-        </DialogActions>
-      </Dialog>
+          </CardContent>
+        </Card>
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="product-select-label">Select Product to Edit</InputLabel>
+          <Select
+            labelId="product-select-label"
+            value={selectedProduct}
+            onChange={handleProductSelect}
+          >
+            {products.map((product) => (
+              <MenuItem key={product._id} value={product._id}>{product.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Button
+          variant="contained"
+          color="error"
+          fullWidth
+          onClick={() => setOpenDeleteDialog(true)}
+        >
+          Delete Selected Product
+        </Button>
+        <Dialog
+          open={openDeleteDialog}
+          onClose={() => setOpenDeleteDialog(false)}
+        >
+          <DialogTitle>Confirm Deletion</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete this product?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+            <Button onClick={handleDeleteProduct} color="error">Delete</Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
     </Box>
   );
 }

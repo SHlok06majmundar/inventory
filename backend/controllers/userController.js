@@ -1,37 +1,70 @@
-const User = require('../models/User');
+// backend/controllers/userController.js
+const User = require('../models/User'); // Adjust the path as needed
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
-// Register new user
-exports.registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+// Function to register a new user
+const registerUser = async (req, res) => {
+  const { name, email, username, password } = req.body;
 
-  const userExists = await User.findOne({ email });
-  if (userExists) {
-    return res.status(400).json({ message: 'User already exists' });
+  // Check for missing fields
+  if (!name || !email || !username || !password) {
+    return res.status(400).json({ message: 'All fields are required.' });
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({ name, email, password: hashedPassword });
+  try {
+    // Check if the user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists with this email.' });
+    }
 
-  await user.save();
-  res.status(201).json({ message: 'User registered successfully' });
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user
+    const user = new User({ name, email, username, password: hashedPassword });
+    await user.save();
+
+    res.status(201).json({ message: 'User registered successfully!' });
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error.code === 11000) { // Duplicate key error
+      return res.status(400).json({ message: 'Username or email already exists. Please choose a different one.' });
+    }
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'An error occurred while registering.' });
+  }
 };
 
-// Login user
-exports.loginUser = async (req, res) => {
+// Function to log in a user
+const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(400).json({ message: 'Invalid credentials' });
+  // Check for missing fields
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required.' });
   }
 
-  const isPasswordCorrect = await bcrypt.compare(password, user.password);
-  if (!isPasswordCorrect) {
-    return res.status(400).json({ message: 'Invalid credentials' });
-  }
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'User not found.' });
+    }
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-  res.json({ token, userId: user._id });
+    // Compare password with hashed password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials.' });
+    }
+
+    res.status(200).json({ message: 'Login successful!' });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'An error occurred while logging in.' });
+  }
 };
+
+module.exports = { registerUser, loginUser };

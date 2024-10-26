@@ -1,16 +1,16 @@
+// backend/routes/productRoutes.js
 const express = require('express');
-const router = express.Router();
 const {
-    addProduct,
-    updateProduct,
-    deleteProduct,
-    getAllProducts
+  getAllProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
 } = require('../controllers/productController');
+const router = express.Router();
 
-// API routes
 router.get('/', getAllProducts); // GET all products
-router.post('/', addProduct); // POST a new product
-router.put('/:id', updateProduct); // PUT update an existing product
-router.delete('/:id', deleteProduct); // DELETE a product by ID
+router.post('/', createProduct); // POST new product
+router.put('/:id', updateProduct); // PUT update product
+router.delete('/:id', deleteProduct); // DELETE product
 
 module.exports = router;
