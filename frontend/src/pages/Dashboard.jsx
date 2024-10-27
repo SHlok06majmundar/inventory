@@ -21,11 +21,20 @@ import {
 
 function Dashboard() {
   const [products, setProducts] = useState([]);
-  const [newProduct, setNewProduct] = useState({ name: '', price: 0, quantity: 0 });
+  const [newProduct, setNewProduct] = useState({ 
+    name: '', 
+    price: 0, 
+    quantity: 0, 
+    category: '', 
+    purchaseDate: '', 
+    serialNumber: '', 
+    image: null 
+  });
   const [editingProduct, setEditingProduct] = useState(null);
   const [message, setMessage] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [categories] = useState(['Electronics', 'Furniture', 'Clothing']); // Add more categories as needed
 
   // Fetch products from the backend
   const fetchProducts = async () => {
@@ -44,11 +53,16 @@ function Dashboard() {
 
   // Handle adding a new product
   const handleAddProduct = async () => {
+    const formData = new FormData();
+    Object.entries(newProduct).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
     try {
-      await axios.post('http://localhost:5000/api/products', newProduct);
+      await axios.post('http://localhost:5000/api/products', formData);
       setMessage('Product added successfully');
       fetchProducts(); // Refresh the product list
-      setNewProduct({ name: '', price: 0, quantity: 0 }); // Reset form
+      setNewProduct({ name: '', price: 0, quantity: 0, category: '', purchaseDate: '', serialNumber: '', image: null }); // Reset form
     } catch (error) {
       console.error('Error adding product:', error);
       setMessage('Error adding product: ' + (error.response?.data?.message || error.message));
@@ -62,11 +76,16 @@ function Dashboard() {
       return;
     }
 
+    const formData = new FormData();
+    Object.entries(newProduct).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
     try {
-      await axios.put(`http://localhost:5000/api/products/${editingProduct._id}`, newProduct);
+      await axios.put(`http://localhost:5000/api/products/${editingProduct._id}`, formData);
       setMessage('Product updated successfully');
       fetchProducts(); // Refresh the product list
-      setNewProduct({ name: '', price: 0, quantity: 0 }); // Reset form
+      setNewProduct({ name: '', price: 0, quantity: 0, category: '', purchaseDate: '', serialNumber: '', image: null }); // Reset form
       setEditingProduct(null); // Reset editing state
     } catch (error) {
       console.error('Error updating product:', error);
@@ -76,7 +95,15 @@ function Dashboard() {
 
   // Handle selecting a product for editing
   const handleEditProduct = (product) => {
-    setNewProduct({ name: product.name, price: product.price, quantity: product.quantity });
+    setNewProduct({ 
+      name: product.name, 
+      price: product.price, 
+      quantity: product.quantity, 
+      category: product.category, 
+      purchaseDate: product.purchaseDate, 
+      serialNumber: product.serialNumber,
+      image: null
+    });
     setEditingProduct(product);
     setSelectedProduct(product._id);
   };
@@ -94,7 +121,6 @@ function Dashboard() {
   const handleDeleteProduct = async () => {
     try {
       await axios.delete(`http://localhost:5000/api/products/${selectedProduct}`);
-      // Remove the deleted product from state
       setProducts(products.filter(product => product._id !== selectedProduct));
       setOpenDeleteDialog(false);
     } catch (error) {
@@ -148,6 +174,50 @@ function Dashboard() {
               value={newProduct.quantity}
               onChange={(e) => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })}
             />
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="category-select-label">Item Category</InputLabel>
+              <Select
+                labelId="category-select-label"
+                value={newProduct.category}
+                onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+              >
+                {categories.map((category) => (
+                  <MenuItem key={category} value={category}>{category}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              label="Purchase Date"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              type="date"
+              value={newProduct.purchaseDate}
+              onChange={(e) => setNewProduct({ ...newProduct, purchaseDate: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              label="Serial Number"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={newProduct.serialNumber}
+              onChange={(e) => setNewProduct({ ...newProduct, serialNumber: e.target.value })}
+            />
+            <Button
+              variant="contained"
+              component="label"
+              fullWidth
+              sx={{ marginBottom: 2 }}
+            >
+              Upload Item Image/Logo
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={(e) => setNewProduct({ ...newProduct, image: e.target.files[0] })}
+              />
+            </Button>
             <Button onClick={editingProduct ? handleUpdateProduct : handleAddProduct} variant="contained" fullWidth>
               {editingProduct ? 'Update Product' : 'Add Product'}
             </Button>

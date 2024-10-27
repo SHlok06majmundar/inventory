@@ -22,6 +22,9 @@ const userRoutes = require('./routes/userRoutes'); // Import user routes
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes); // Use user routes here
 
+// Log MongoDB URI for debugging
+console.log('MongoDB URI:', process.env.MONGO_URI);
+
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB Connected"))

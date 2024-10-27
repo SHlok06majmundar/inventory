@@ -17,7 +17,7 @@ function Register() {
 
     // Validate password length
     if (password.length < 7) {
-      setErrorMessage('Password should be at least 7 characters.');
+      setErrorMessage('Password should be at least 7 characters.(Thala for a reason)');
       return; // Stop form submission if validation fails
     }
 

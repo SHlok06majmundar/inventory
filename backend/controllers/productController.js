@@ -1,72 +1,68 @@
 // backend/controllers/productController.js
 const Product = require('../models/Product');
 
-// Function to get all products
-const getAllProducts = async (req, res) => {
+exports.createProduct = async (req, res) => {
   try {
-    const products = await Product.find();
-    res.status(200).json(products);
+    const { name, price, quantity, category, purchaseDate, serialNumber } = req.body;
+    const image = req.file.path; // Assuming multer is used to handle file uploads
+
+    const product = await Product.create({ 
+      name, 
+      price, 
+      quantity, 
+      category, 
+      purchaseDate, 
+      serialNumber, 
+      image 
+    });
+
+    return res.status(201).json({ product });
   } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).json({ message: 'An error occurred while fetching products.' });
+    return res.status(400).json({ message: error.message });
   }
 };
 
-// Function to create a new product
-const createProduct = async (req, res) => {
-  const { name, price, quantity } = req.body;
-
-  // Check for missing fields
-  if (!name || price === undefined || quantity === undefined) {
-    return res.status(400).json({ message: 'All fields are required.' });
-  }
-
+exports.updateProduct = async (req, res) => {
   try {
-    const newProduct = new Product({ name, price, quantity });
-    await newProduct.save();
-    res.status(201).json(newProduct);
-  } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ message: 'An error occurred while creating the product.' });
-  }
-};
+    const { id } = req.params;
+    const updatedData = { ...req.body };
 
-// Function to update a product
-const updateProduct = async (req, res) => {
-  const { id } = req.params;
-  const { name, price, quantity } = req.body;
-
-  try {
-    const updatedProduct = await Product.findByIdAndUpdate(id, { name, price, quantity }, { new: true });
-    if (!updatedProduct) {
-      return res.status(404).json({ message: 'Product not found.' });
+    if (req.file) {
+      updatedData.image = req.file.path; // Update image if a new one is uploaded
     }
-    res.status(200).json(updatedProduct);
-  } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(500).json({ message: 'An error occurred while updating the product.' });
-  }
-};
 
-// Function to delete a product
-const deleteProduct = async (req, res) => {
-  const { id } = req.params;
+    const product = await Product.findByIdAndUpdate(id, updatedData, { new: true });
 
-  try {
-    const deletedProduct = await Product.findByIdAndDelete(id);
-    if (!deletedProduct) {
-      return res.status(404).json({ message: 'Product not found.' });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
-    res.status(200).json({ message: 'Product deleted successfully.' });
+
+    return res.status(200).json({ product });
   } catch (error) {
-    console.error('Error deleting product:', error);
-    res.status(500).json({ message: 'An error occurred while deleting the product.' });
+    return res.status(400).json({ message: error.message });
   }
 };
 
-module.exports = {
-  getAllProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
+exports.deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findByIdAndDelete(id);
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    return res.status(204).send(); // No content
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+exports.getProducts = async (req, res) => {
+  try {
+    const products = await Product.find({});
+    return res.status(200).json(products);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
 };
