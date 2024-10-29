@@ -1,7 +1,6 @@
-// backend/routes/productRoutes.js
 const express = require('express');
 const multer = require('multer');
-const { createProduct, updateProduct, deleteProduct, getProducts } = require('../controllers/productController');
+const { createProduct, getProducts, updateProduct, deleteProduct } = require('../controllers/productController');
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' }); // Ensure you have the uploads directory

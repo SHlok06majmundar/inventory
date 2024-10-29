@@ -1,4 +1,3 @@
-// backend/models/Product.js
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
@@ -6,9 +5,9 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   quantity: { type: Number, required: true },
   category: { type: String, required: true },
-  purchaseDate: { type: Date, required: true },
-  serialNumber: { type: String, required: true },
-  image: { type: String, required: true }, // Store the path or URL of the image
-}, { timestamps: true });
+  purchaseDate: { type: Date },
+  serialNumber: { type: String },
+  image: { type: String } // Path to the image file
+});
 
 module.exports = mongoose.model('Product', productSchema);
