@@ -152,6 +152,24 @@ function Dashboard() {
               value={newProduct.name}
               onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
             />
+            <TextField
+              label="Price"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              type="number"
+              value={newProduct.price}
+              onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
+            />
+            <TextField
+              label="Quantity"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              type="number"
+              value={newProduct.quantity}
+              onChange={(e) => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })}
+            />
             <FormControl fullWidth margin="normal">
               <InputLabel id="category-select-label">Item Category</InputLabel>
               <Select

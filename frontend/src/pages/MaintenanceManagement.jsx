@@ -212,7 +212,9 @@ function MaintenanceManagement() {
             <List>
               {maintenanceRecords.map((record) => (
                 <ListItem key={record._id}>
-                  <ListItemText primary={`Product: ${record.product.name}, Service: ${record.serviceType}, Date: ${new Date(record.dateOfService).toLocaleDateString()}, Cost: $${record.costOfService}`} />
+                  <ListItemText
+                    primary={`Product: ${record.product ? record.product.name : 'Unknown'}, Service: ${record.serviceType}, Date: ${new Date(record.dateOfService).toLocaleDateString()}, Cost: $${record.costOfService}`}
+                  />
                   <Button
                     variant="outlined"
                     onClick={() => handleEditMaintenance(record)}
@@ -256,7 +258,7 @@ function MaintenanceManagement() {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+            <Button onClick={() => setOpenDeleteDialog(false)} color="primary">Cancel</Button>
             <Button onClick={handleDeleteMaintenance} color="error">Delete</Button>
           </DialogActions>
         </Dialog>

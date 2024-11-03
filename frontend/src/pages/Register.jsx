@@ -1,3 +1,4 @@
+// Register.jsx
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +18,7 @@ function Register() {
 
     // Validate password length
     if (password.length < 7) {
-      setErrorMessage('Password should be at least 7 characters.(Thala for a reason)');
+      setErrorMessage('Password should be at least 7 characters.');
       return; // Stop form submission if validation fails
     }
 
@@ -27,11 +28,7 @@ function Register() {
       navigate('/dashboard');
     } catch (error) {
       if (error.response) {
-        if (error.response.data.message === 'User already exists') {
-          setErrorMessage('This email is already registered. Please use a different email or log in.');
-        } else {
-          setErrorMessage('An error occurred. Please try again.');
-        }
+        setErrorMessage(error.response.data.message || 'An error occurred. Please try again.');
       } else {
         console.error('Unexpected error:', error);
         setErrorMessage('Network error. Please try again.');
