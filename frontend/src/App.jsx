@@ -4,7 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider } from './context/AuthContext';
-
+import MaintenanceManagement from './pages/MaintenanceManagement';
 function App() {
   return (
     <AuthProvider>
@@ -13,6 +13,8 @@ function App() {
           <Route path="/" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/maintenance-management" element={<MaintenanceManagement />} />
+
         </Routes>
       </Router>
     </AuthProvider>

@@ -18,25 +18,26 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
   const [products, setProducts] = useState([]);
-  const [newProduct, setNewProduct] = useState({ 
-    name: '', 
-    price: 0, 
-    quantity: 0, 
-    category: '', 
-    purchaseDate: '', 
-    serialNumber: '', 
-    image: null 
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    price: 0,
+    quantity: 0,
+    category: '',
+    purchaseDate: '',
+    serialNumber: '',
+    image: null,
   });
   const [editingProduct, setEditingProduct] = useState(null);
   const [message, setMessage] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [categories] = useState(['Electronics', 'Furniture', 'Clothing']); // Add more categories as needed
+  const [categories] = useState(['Electronics', 'Furniture', 'Clothing']);
+  const navigate = useNavigate();
 
-  // Fetch products from the backend
   const fetchProducts = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/products');
@@ -51,7 +52,6 @@ function Dashboard() {
     fetchProducts();
   }, []);
 
-  // Handle adding a new product
   const handleAddProduct = async () => {
     const formData = new FormData();
     Object.entries(newProduct).forEach(([key, value]) => {
@@ -61,15 +61,14 @@ function Dashboard() {
     try {
       await axios.post('http://localhost:5000/api/products', formData);
       setMessage('Product added successfully');
-      fetchProducts(); // Refresh the product list
-      setNewProduct({ name: '', price: 0, quantity: 0, category: '', purchaseDate: '', serialNumber: '', image: null }); // Reset form
+      fetchProducts();
+      setNewProduct({ name: '', price: 0, quantity: 0, category: '', purchaseDate: '', serialNumber: '', image: null });
     } catch (error) {
       console.error('Error adding product:', error);
       setMessage('Error adding product: ' + (error.response?.data?.message || error.message));
     }
   };
 
-  // Handle updating a product
   const handleUpdateProduct = async () => {
     if (!editingProduct?._id) {
       setMessage('No product selected for editing.');
@@ -84,31 +83,29 @@ function Dashboard() {
     try {
       await axios.put(`http://localhost:5000/api/products/${editingProduct._id}`, formData);
       setMessage('Product updated successfully');
-      fetchProducts(); // Refresh the product list
-      setNewProduct({ name: '', price: 0, quantity: 0, category: '', purchaseDate: '', serialNumber: '', image: null }); // Reset form
-      setEditingProduct(null); // Reset editing state
+      fetchProducts();
+      setNewProduct({ name: '', price: 0, quantity: 0, category: '', purchaseDate: '', serialNumber: '', image: null });
+      setEditingProduct(null);
     } catch (error) {
       console.error('Error updating product:', error);
       setMessage('Error updating product: ' + (error.response?.data?.message || error.message));
     }
   };
 
-  // Handle selecting a product for editing
   const handleEditProduct = (product) => {
-    setNewProduct({ 
-      name: product.name, 
-      price: product.price, 
-      quantity: product.quantity, 
-      category: product.category, 
-      purchaseDate: product.purchaseDate, 
+    setNewProduct({
+      name: product.name,
+      price: product.price,
+      quantity: product.quantity,
+      category: product.category,
+      purchaseDate: product.purchaseDate,
       serialNumber: product.serialNumber,
-      image: null
+      image: null,
     });
     setEditingProduct(product);
     setSelectedProduct(product._id);
   };
 
-  // Handle product selection from dropdown
   const handleProductSelect = (event) => {
     const productId = event.target.value;
     const product = products.find((p) => p._id === productId);
@@ -117,7 +114,6 @@ function Dashboard() {
     }
   };
 
-  // Handle deleting a product
   const handleDeleteProduct = async () => {
     try {
       await axios.delete(`http://localhost:5000/api/products/${selectedProduct}`);
@@ -155,24 +151,6 @@ function Dashboard() {
               margin="normal"
               value={newProduct.name}
               onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-            />
-            <TextField
-              label="Price"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              type="number"
-              value={newProduct.price}
-              onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
-            />
-            <TextField
-              label="Quantity"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              type="number"
-              value={newProduct.quantity}
-              onChange={(e) => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })}
             />
             <FormControl fullWidth margin="normal">
               <InputLabel id="category-select-label">Item Category</InputLabel>
@@ -242,6 +220,15 @@ function Dashboard() {
           onClick={() => setOpenDeleteDialog(true)}
         >
           Delete Selected Product
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          onClick={() => navigate('/maintenance-management')}
+          sx={{ marginTop: 2 }}
+        >
+          Go to Maintenance Management
         </Button>
         <Dialog
           open={openDeleteDialog}
