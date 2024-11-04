@@ -25,7 +25,7 @@ function Login() {
     setErrorMessage(''); // Reset error message on submit
 
     try {
-      const res = await axios.post('http://localhost:5000/api/users/login', { email, password });
+      const res = await axios.post('https://inventory-1jqm.onrender.com/api/users/login', { email, password });
       const token = res.data.token;
       login(token); // Call the login function to set the token in AuthContext
 

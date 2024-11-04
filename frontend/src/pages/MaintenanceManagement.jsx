@@ -43,7 +43,7 @@ function MaintenanceManagement() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/products', {
+        const res = await axios.get('https://inventory-1jqm.onrender.com/api/products', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -56,7 +56,7 @@ function MaintenanceManagement() {
 
     const fetchMaintenanceRecords = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/maintenance', {
+        const res = await axios.get('https://inventory-1jqm.onrender.com/api/maintenance', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -91,7 +91,7 @@ function MaintenanceManagement() {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:5000/api/maintenance/${selectedRecordId}`, maintenanceData, {
+        await axios.put(`https://inventory-1jqm.onrender.com/api/maintenance/${selectedRecordId}`, maintenanceData, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -103,7 +103,7 @@ function MaintenanceManagement() {
           setMessage('Maintenance record for this product already exists. Edit it instead.');
           return;
         }
-        await axios.post('http://localhost:5000/api/maintenance', maintenanceData, {
+        await axios.post('https://inventory-1jqm.onrender.com/api/maintenance', maintenanceData, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -128,7 +128,7 @@ function MaintenanceManagement() {
   };
 
   const refreshMaintenanceRecords = async () => {
-    const res = await axios.get('http://localhost:5000/api/maintenance', {
+    const res = await axios.get('https://inventory-1jqm.onrender.com/api/maintenance', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
@@ -147,7 +147,7 @@ function MaintenanceManagement() {
 
   const handleDeleteMaintenance = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/maintenance/${selectedRecordId}`, {
+      await axios.delete(`https://inventory-1jqm.onrender.com/api/maintenance/${selectedRecordId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },

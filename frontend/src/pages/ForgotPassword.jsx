@@ -24,7 +24,7 @@ function ForgotPassword() {
     setErrorMessage('');
 
     try {
-      const res = await axios.post('http://localhost:5000/api/users/forgot-password', { email });
+      const res = await axios.post('https://inventory-1jqm.onrender.com/api/users/forgot-password', { email });
       setMessage(res.data.message); // Assuming the server sends a success message
     } catch (error) {
       if (error.response) {

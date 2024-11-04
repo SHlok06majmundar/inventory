@@ -44,7 +44,7 @@ function Dashboard() {
 
     const fetchProducts = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/products', {
+            const res = await axios.get('https://inventory-1jqm.onrender.com/api/products', {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
@@ -74,7 +74,7 @@ function Dashboard() {
         });
 
         try {
-            await axios.post('http://localhost:5000/api/products', formData, {
+            await axios.post('https://inventory-1jqm.onrender.com/api/products', formData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
@@ -107,7 +107,7 @@ function Dashboard() {
         });
 
         try {
-            await axios.put(`http://localhost:5000/api/products/${editingProduct._id}`, formData, {
+            await axios.put(`https://inventory-1jqm.onrender.com/api/products/${editingProduct._id}`, formData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
@@ -138,7 +138,7 @@ function Dashboard() {
 
     const handleDeleteProduct = async () => {
         try {
-            await axios.delete(`http://localhost:5000/api/products/${selectedProduct}`, {
+            await axios.delete(`https://inventory-1jqm.onrender.com/api/products/${selectedProduct}`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
