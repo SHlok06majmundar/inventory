@@ -39,7 +39,7 @@ function Dashboard() {
     const [selectedProduct, setSelectedProduct] = useState('');
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [categories] = useState(['Electronics', 'Furniture', 'Clothing']);
-    
+
     const fetchProducts = async () => {
         try {
             const res = await axios.get('http://localhost:5000/api/products', {
@@ -79,7 +79,7 @@ function Dashboard() {
             });
             setMessage('Product added successfully');
             fetchProducts();
-            setNewProduct({ name: '', price: 0, quantity: 0, category: '', purchaseDate: '', serialNumber: '', image: null });
+            resetForm();
         } catch (error) {
             console.error('Error adding product:', error);
             setMessage('Error adding product: ' + (error.response?.data?.message || error.message));
@@ -112,7 +112,7 @@ function Dashboard() {
             });
             setMessage('Product updated successfully');
             fetchProducts();
-            setNewProduct({ name: '', price: 0, quantity: 0, category: '', purchaseDate: '', serialNumber: '', image: null });
+            resetForm();
             setEditingProduct(null);
         } catch (error) {
             console.error('Error updating product:', error);
@@ -150,6 +150,13 @@ function Dashboard() {
         }
     };
 
+    // Function to reset the form
+    const resetForm = () => {
+        setNewProduct({ name: '', price: 0, quantity: 0, category: '', purchaseDate: '', serialNumber: '', image: null });
+        setError('');
+        setMessage('');
+    };
+
     // Function to get image preview URL
     const getImagePreview = (file) => {
         return file ? URL.createObjectURL(file) : null;
@@ -161,20 +168,21 @@ function Dashboard() {
                 position: 'relative',
                 display: 'flex',
                 justifyContent: 'center',
-                alignItems: 'center',
+                alignItems: 'flex-start',
                 minHeight: '100vh',
                 width: '100vw',
                 backgroundColor: '#f0f2f5',
-                padding: '0',
-                margin: '0',
+                padding: 4,
             }}
         >
-            <Box sx={{ maxWidth: '500px', width: '100%', padding: 2 }}>
-                <Typography variant="h4" align="center">Product Dashboard</Typography>
+            <Box sx={{ maxWidth: '600px', width: '100%', padding: 2, backgroundColor: '#fff', borderRadius: 2, boxShadow: 3 }}>
+                <Typography variant="h4" align="center" sx={{ marginBottom: 2 }}>Product Dashboard</Typography>
                 {message && <Alert severity="info">{message}</Alert>}
                 {error && <Alert severity="error">{error}</Alert>}
-                <Card sx={{ marginBottom: 2 }}>
+                
+                <Card sx={{ marginBottom: 2, padding: 2 }}>
                     <CardContent>
+                        <Typography variant="h6" align="center">Add / Update Product</Typography>
                         <TextField
                             label="Product Name"
                             variant="outlined"
@@ -235,6 +243,7 @@ function Dashboard() {
                         <input
                             type="file"
                             onChange={(e) => setNewProduct({ ...newProduct, image: e.target.files[0] })}
+                            style={{ margin: '16px 0' }}
                         />
                         
                         {/* Display the uploaded image as an avatar */}
@@ -242,7 +251,7 @@ function Dashboard() {
                             <Avatar
                                 alt={newProduct.name}
                                 src={getImagePreview(newProduct.image)}
-                                sx={{ width: 56, height: 56, marginTop: 2 }}
+                                sx={{ width: 56, height: 56, marginTop: 2, marginLeft: 'auto', marginRight: 'auto', display: 'block' }}
                             />
                         )}
 
@@ -250,50 +259,70 @@ function Dashboard() {
                             variant="contained"
                             color="primary"
                             onClick={editingProduct ? handleUpdateProduct : handleAddProduct}
-                            sx={{ marginTop: 2 }}
+                            sx={{ marginTop: 2, width: '100%' }}
                         >
                             {editingProduct ? 'Update Product' : 'Add Product'}
                         </Button>
                     </CardContent>
                 </Card>
 
-                <Typography variant="h5" align="center">Products List</Typography>
+                <Typography variant="h5" align="center" sx={{ marginBottom: 2 }}>Products List</Typography>
                 {products.map((product) => (
-                    <Card key={product._id} sx={{ marginBottom: 2 }}>
+                    <Card key={product._id} sx={{ marginBottom: 2, padding: 2 }}>
                         <CardContent>
                             <Typography variant="h6">{product.name}</Typography>
-                            <Typography>Price: {product.price}</Typography>
+                            <Typography>Price: ${product.price.toFixed(2)}</Typography>
                             <Typography>Quantity: {product.quantity}</Typography>
-                            <Button onClick={() => handleEditProduct(product)}>Edit</Button>
-                            <Button onClick={() => { setSelectedProduct(product._id); setOpenDeleteDialog(true); }}>Delete</Button>
+                            <Typography>Category: {product.category}</Typography>
+                            <Typography>Purchase Date: {new Date(product.purchaseDate).toLocaleDateString()}</Typography>
+                            <Typography>Serial Number: {product.serialNumber}</Typography>
+                            <Box display="flex" justifyContent="space-between" marginTop={2}>
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={() => handleEditProduct(product)}
+                                    sx={{ marginRight: 1 }}
+                                >
+                                    Edit
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    color="error"
+                                    onClick={() => { setOpenDeleteDialog(true); setSelectedProduct(product._id); }}
+                                >
+                                    Delete
+                                </Button>
+                            </Box>
                         </CardContent>
                     </Card>
                 ))}
 
-                {/* Button to redirect to Maintenance Management */}
                 <Button
                     variant="contained"
-                    color="secondary"
-                    onClick={() => navigate('/maintenance-management')}
-                    sx={{ marginTop: 2 }}
+                    color="primary"
+                    onClick={() => navigate('/maintenance-management')} // Redirect to maintenance management
+                    sx={{ marginTop: 2, width: '100%' }}
                 >
                     Go to Maintenance Management
                 </Button>
-            </Box>
 
-            {/* Confirmation Dialog for Deleting a Product */}
-            <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-                <DialogTitle>Confirm Delete</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Are you sure you want to delete this product?
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-                    <Button onClick={handleDeleteProduct} color="error">Delete</Button>
-                </DialogActions>
-            </Dialog>
+                <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+                    <DialogTitle>Confirm Deletion</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Are you sure you want to delete this product? This action cannot be undone.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOpenDeleteDialog(false)} color="primary">
+                            Cancel
+                        </Button>
+                        <Button onClick={handleDeleteProduct} color="error">
+                            Delete
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Box>
         </Box>
     );
 }

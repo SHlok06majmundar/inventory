@@ -1,6 +1,5 @@
-// frontend/src/pages/Login.jsx
-import { useState, useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+// frontend/src/pages/ForgotPassword.jsx
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -13,34 +12,24 @@ import {
   Alert
 } from '@mui/material';
 
-function Login() {
+function ForgotPassword() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { login } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage(''); // Reset error message on submit
+    setMessage('');
+    setErrorMessage('');
 
     try {
-      const res = await axios.post('http://localhost:5000/api/users/login', { email, password });
-      const token = res.data.token;
-      login(token); // Call the login function to set the token in AuthContext
-
-      localStorage.setItem('token', token); // Store the token
-
-      navigate('/dashboard'); // Redirect to the dashboard after login
+      const res = await axios.post('http://localhost:5000/api/users/forgot-password', { email });
+      setMessage(res.data.message); // Assuming the server sends a success message
     } catch (error) {
       if (error.response) {
-        if (error.response.status === 401) {
-          setErrorMessage('Invalid credentials. Please try again.');
-        } else {
-          setErrorMessage('Login failed. Please try again.');
-        }
+        setErrorMessage('Failed to send reset email. Please try again.');
       } else {
-        console.error('Unexpected error:', error);
         setErrorMessage('An unexpected error occurred. Please try again later.');
       }
     }
@@ -55,8 +44,6 @@ function Login() {
         minHeight: '100vh',
         width: '100vw',
         backgroundColor: '#f0f2f5',
-        padding: '0',
-        margin: '0',
       }}
     >
       <Card
@@ -77,7 +64,7 @@ function Login() {
             align="center"
             style={{ fontWeight: 'bold', color: '#1976d2' }}
           >
-            Login
+            Forgot Password
           </Typography>
           <Typography
             variant="body1"
@@ -85,7 +72,7 @@ function Login() {
             gutterBottom
             style={{ marginBottom: '20px', color: 'gray' }}
           >
-            Welcome back! Please log in to your account.
+            Enter your email address and we'll send you a link to reset your password.
           </Typography>
           <form onSubmit={handleSubmit}>
             <Box display="flex" flexDirection="column" gap={2} mb={3}>
@@ -98,18 +85,14 @@ function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <TextField
-                label="Password"
-                variant="outlined"
-                fullWidth
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
               {errorMessage && (
                 <Alert severity="error">
                   {errorMessage}
+                </Alert>
+              )}
+              {message && (
+                <Alert severity="success">
+                  {message}
                 </Alert>
               )}
               <Button
@@ -119,7 +102,7 @@ function Login() {
                 fullWidth
                 style={{ padding: '12px', fontWeight: 'bold' }}
               >
-                Login
+                Send Reset Link
               </Button>
             </Box>
           </form>
@@ -128,22 +111,13 @@ function Login() {
             align="center"
             style={{ marginTop: '15px' }}
           >
-            Don't have an account?{' '}
-            <a href="/" style={{ color: '#1976d2', textDecoration: 'none' }}>
-              Register here
-            </a>
-          </Typography>
-          <Typography
-            variant="body2"
-            align="center"
-            style={{ marginTop: '15px' }}
-          >
-            <a
-              onClick={() => navigate('/forgot-password')}
-              style={{ color: '#1976d2', textDecoration: 'none', cursor: 'pointer' }}
+            Remembered your password?{' '}
+            <Button
+              onClick={() => navigate('/login')}
+              style={{ color: '#1976d2', textDecoration: 'none' }}
             >
-              Forgot Password?
-            </a>
+              Login here
+            </Button>
           </Typography>
         </CardContent>
       </Card>
@@ -151,4 +125,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default ForgotPassword;

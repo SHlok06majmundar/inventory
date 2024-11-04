@@ -44,7 +44,7 @@ function MaintenanceManagement() {
       try {
         const res = await axios.get('http://localhost:5000/api/products', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
         setProducts(res.data);
@@ -57,7 +57,7 @@ function MaintenanceManagement() {
       try {
         const res = await axios.get('http://localhost:5000/api/maintenance', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
         setMaintenanceRecords(res.data);
@@ -92,7 +92,7 @@ function MaintenanceManagement() {
       if (isEditing) {
         await axios.put(`http://localhost:5000/api/maintenance/${selectedRecordId}`, maintenanceData, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
         setMessage('Maintenance record updated successfully.');
@@ -104,7 +104,7 @@ function MaintenanceManagement() {
         }
         await axios.post('http://localhost:5000/api/maintenance', maintenanceData, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
         setMessage('Maintenance logged successfully.');
@@ -129,7 +129,7 @@ function MaintenanceManagement() {
   const refreshMaintenanceRecords = async () => {
     const res = await axios.get('http://localhost:5000/api/maintenance', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
     setMaintenanceRecords(res.data);
@@ -148,7 +148,7 @@ function MaintenanceManagement() {
     try {
       await axios.delete(`http://localhost:5000/api/maintenance/${selectedRecordId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
       setOpenDeleteDialog(false);
@@ -169,15 +169,15 @@ function MaintenanceManagement() {
         minHeight: '100vh',
         width: '100vw',
         backgroundColor: '#f0f2f5',
-        padding: '0',
-        margin: '0',
+        padding: 2,
       }}
     >
-      <Box sx={{ maxWidth: '500px', width: '100%', padding: 2 }}>
-        <Typography variant="h4" align="center">Maintenance Management</Typography>
+      <Box sx={{ maxWidth: '600px', width: '100%', padding: 2, boxShadow: 3, borderRadius: 2, backgroundColor: '#fff' }}>
+        <Typography variant="h4" align="center" gutterBottom>Maintenance Management</Typography>
         {message && <Alert severity="info">{message}</Alert>}
         {error && <Alert severity="error">{error}</Alert>}
-        <Card sx={{ marginBottom: 2 }}>
+        
+        <Card sx={{ marginBottom: 2, borderRadius: 2 }}>
           <CardContent>
             <FormControl fullWidth margin="normal">
               <InputLabel id="product-select-label">Select Product</InputLabel>
@@ -229,39 +229,42 @@ function MaintenanceManagement() {
             <Button
               variant="contained"
               fullWidth
-              sx={{ marginTop: 2 }}
+              sx={{ marginTop: 2, backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#115293' } }}
               onClick={handleLogOrUpdateMaintenance}
             >
-              {isEditing ? 'Update Maintenance' : 'Log Maintenance'}
+              {isEditing ? 'Update Maintenance' : 'Add Maintenance'}
             </Button>
           </CardContent>
         </Card>
 
-        <Card sx={{ marginBottom: 2 }}>
+        <Card sx={{ marginBottom: 2, borderRadius: 2 }}>
           <CardContent>
-            <Typography variant="h6" align="center">Maintenance Records</Typography>
+            <Typography variant="h6" align="center" gutterBottom>Maintenance Records</Typography>
             <List>
               {maintenanceRecords.map((record) => (
-                <ListItem key={record._id}>
+                <ListItem key={record._id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <ListItemText
                     primary={`Product: ${record.product ? record.product.name : 'Unknown'}, Service: ${record.serviceType}, Date: ${new Date(record.dateOfService).toLocaleDateString()}, Cost: $${record.costOfService}`}
                   />
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleEditMaintenance(record)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    onClick={() => {
-                      setSelectedRecordId(record._id);
-                      setOpenDeleteDialog(true);
-                    }}
-                  >
-                    Delete
-                  </Button>
+                  <Box>
+                    <Button
+                      variant="outlined"
+                      onClick={() => handleEditMaintenance(record)}
+                      sx={{ marginRight: 1 }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => {
+                        setSelectedRecordId(record._id);
+                        setOpenDeleteDialog(true);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </Box>
                 </ListItem>
               ))}
             </List>
@@ -273,7 +276,7 @@ function MaintenanceManagement() {
           color="primary"
           fullWidth
           onClick={() => navigate('/dashboard')}
-          sx={{ marginTop: 2 }}
+          sx={{ marginTop: 2, backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#115293' } }}
         >
           Go to Dashboard
         </Button>
@@ -282,17 +285,15 @@ function MaintenanceManagement() {
           open={openDeleteDialog}
           onClose={() => setOpenDeleteDialog(false)}
         >
-          <DialogTitle>Confirm Deletion</DialogTitle>
+          <DialogTitle>Delete Maintenance Record</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to delete this maintenance record?
+              Are you sure you want to delete this maintenance record? This action cannot be undone.
             </DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-            <Button onClick={handleDeleteMaintenance} color="error">
-              Delete
-            </Button>
+            <Button onClick={handleDeleteMaintenance} color="error">Delete</Button>
           </DialogActions>
         </Dialog>
       </Box>
