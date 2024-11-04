@@ -18,11 +18,13 @@ import {
     DialogContentText,
     DialogTitle,
     Avatar,
+    IconButton,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 function Dashboard() {
-    const navigate = useNavigate(); // Initialize navigate
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [newProduct, setNewProduct] = useState({
         name: '',
@@ -150,22 +152,28 @@ function Dashboard() {
         }
     };
 
-    // Function to reset the form
     const resetForm = () => {
         setNewProduct({ name: '', price: 0, quantity: 0, category: '', purchaseDate: '', serialNumber: '', image: null });
         setError('');
         setMessage('');
     };
 
-    // Function to get image preview URL
     const getImagePreview = (file) => {
         return file ? URL.createObjectURL(file) : null;
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/login');
+    };
+
+    const handleGoToMaintenance = () => {
+        navigate('/maintenance-management'); // Adjust this path as necessary
     };
 
     return (
         <Box
             sx={{
-                position: 'relative',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'flex-start',
@@ -175,12 +183,23 @@ function Dashboard() {
                 padding: 4,
             }}
         >
-            <Box sx={{ maxWidth: '600px', width: '100%', padding: 2, backgroundColor: '#fff', borderRadius: 2, boxShadow: 3 }}>
-                <Typography variant="h4" align="center" sx={{ marginBottom: 2 }}>Product Dashboard</Typography>
+            <IconButton
+                sx={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    color: 'primary.main',
+                }}
+                onClick={handleLogout}
+            >
+                <LogoutIcon />
+            </IconButton>
+            <Box sx={{ maxWidth: '600px', width: '100%', padding: 3, backgroundColor: '#fff', borderRadius: 2, boxShadow: 3 }}>
+                <Typography variant="h4" align="center" sx={{ marginBottom: 3 }}>Product Dashboard</Typography>
                 {message && <Alert severity="info">{message}</Alert>}
                 {error && <Alert severity="error">{error}</Alert>}
-                
-                <Card sx={{ marginBottom: 2, padding: 2 }}>
+
+                <Card sx={{ marginBottom: 3 }}>
                     <CardContent>
                         <Typography variant="h6" align="center">Add / Update Product</Typography>
                         <TextField
@@ -245,8 +264,6 @@ function Dashboard() {
                             onChange={(e) => setNewProduct({ ...newProduct, image: e.target.files[0] })}
                             style={{ margin: '16px 0' }}
                         />
-                        
-                        {/* Display the uploaded image as an avatar */}
                         {newProduct.image && (
                             <Avatar
                                 alt={newProduct.name}
@@ -254,42 +271,36 @@ function Dashboard() {
                                 sx={{ width: 56, height: 56, marginTop: 2, marginLeft: 'auto', marginRight: 'auto', display: 'block' }}
                             />
                         )}
-
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={editingProduct ? handleUpdateProduct : handleAddProduct}
-                            sx={{ marginTop: 2, width: '100%' }}
-                        >
-                            {editingProduct ? 'Update Product' : 'Add Product'}
-                        </Button>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+                            <Button variant="contained" color="primary" onClick={handleAddProduct}>
+                                Add Product
+                            </Button>
+                            <Button variant="contained" color="secondary" onClick={handleUpdateProduct}>
+                                Update Product
+                            </Button>
+                        </Box>
                     </CardContent>
                 </Card>
 
-                <Typography variant="h5" align="center" sx={{ marginBottom: 2 }}>Products List</Typography>
+                <Button variant="outlined" color="primary" onClick={handleGoToMaintenance} sx={{ marginTop: 2, display: 'block', marginLeft: 'auto', marginRight: 'auto' }}>
+                    Go to Maintenance Management
+                </Button>
+
+                <Typography variant="h6" align="center" sx={{ marginTop: 4 }}>Product List</Typography>
                 {products.map((product) => (
-                    <Card key={product._id} sx={{ marginBottom: 2, padding: 2 }}>
+                    <Card key={product._id} sx={{ marginBottom: 2 }}>
                         <CardContent>
-                            <Typography variant="h6">{product.name}</Typography>
-                            <Typography>Price: ${product.price.toFixed(2)}</Typography>
-                            <Typography>Quantity: {product.quantity}</Typography>
-                            <Typography>Category: {product.category}</Typography>
-                            <Typography>Purchase Date: {new Date(product.purchaseDate).toLocaleDateString()}</Typography>
-                            <Typography>Serial Number: {product.serialNumber}</Typography>
-                            <Box display="flex" justifyContent="space-between" marginTop={2}>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    onClick={() => handleEditProduct(product)}
-                                    sx={{ marginRight: 1 }}
-                                >
+                            <Typography variant="body1">{product.name}</Typography>
+                            <Typography variant="body2">Price: {product.price}</Typography>
+                            <Typography variant="body2">Quantity: {product.quantity}</Typography>
+                            <Typography variant="body2">Category: {product.category}</Typography>
+                            <Typography variant="body2">Purchase Date: {product.purchaseDate}</Typography>
+                            <Typography variant="body2">Serial Number: {product.serialNumber}</Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 1 }}>
+                                <Button onClick={() => handleEditProduct(product)} variant="outlined" color="primary">
                                     Edit
                                 </Button>
-                                <Button
-                                    variant="outlined"
-                                    color="error"
-                                    onClick={() => { setOpenDeleteDialog(true); setSelectedProduct(product._id); }}
-                                >
+                                <Button onClick={() => { setSelectedProduct(product._id); setOpenDeleteDialog(true); }} variant="outlined" color="error">
                                     Delete
                                 </Button>
                             </Box>
@@ -297,20 +308,11 @@ function Dashboard() {
                     </Card>
                 ))}
 
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => navigate('/maintenance-management')} // Redirect to maintenance management
-                    sx={{ marginTop: 2, width: '100%' }}
-                >
-                    Go to Maintenance Management
-                </Button>
-
                 <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-                    <DialogTitle>Confirm Deletion</DialogTitle>
+                    <DialogTitle>Delete Product</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Are you sure you want to delete this product? This action cannot be undone.
+                            Are you sure you want to delete this product?
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

@@ -21,6 +21,7 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 
 function MaintenanceManagement() {
@@ -172,12 +173,22 @@ function MaintenanceManagement() {
         padding: 2,
       }}
     >
+      {/* Logout Icon */}
+      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+        <Button onClick={() => {
+          localStorage.removeItem('token');
+          navigate('/login'); // Redirect to login page
+        }}>
+          <LogoutIcon sx={{ color: 'black' }} />
+        </Button>
+      </Box>
+
       <Box sx={{ maxWidth: '600px', width: '100%', padding: 2, boxShadow: 3, borderRadius: 2, backgroundColor: '#fff' }}>
-        <Typography variant="h4" align="center" gutterBottom>Maintenance Management</Typography>
+        <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 'bold', color: '#333' }}>Maintenance Management</Typography>
         {message && <Alert severity="info">{message}</Alert>}
         {error && <Alert severity="error">{error}</Alert>}
-        
-        <Card sx={{ marginBottom: 2, borderRadius: 2 }}>
+
+        <Card sx={{ marginBottom: 2, borderRadius: 2, boxShadow: 1 }}>
           <CardContent>
             <FormControl fullWidth margin="normal">
               <InputLabel id="product-select-label">Select Product</InputLabel>
@@ -237,15 +248,13 @@ function MaintenanceManagement() {
           </CardContent>
         </Card>
 
-        <Card sx={{ marginBottom: 2, borderRadius: 2 }}>
+        <Card sx={{ marginBottom: 2, borderRadius: 2, boxShadow: 1 }}>
           <CardContent>
-            <Typography variant="h6" align="center" gutterBottom>Maintenance Records</Typography>
+            <Typography variant="h6" gutterBottom>Maintenance Records</Typography>
             <List>
               {maintenanceRecords.map((record) => (
-                <ListItem key={record._id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <ListItemText
-                    primary={`Product: ${record.product ? record.product.name : 'Unknown'}, Service: ${record.serviceType}, Date: ${new Date(record.dateOfService).toLocaleDateString()}, Cost: $${record.costOfService}`}
-                  />
+                <ListItem key={record._id} sx={{ '&:hover': { backgroundColor: '#f1f1f1' } }}>
+                  <ListItemText primary={`${record.product.name} - ${record.serviceType}`} secondary={`Date: ${record.dateOfService.split('T')[0]}, Cost: ₹${record.costOfService}`} />
                   <Box>
                     <Button
                       variant="outlined"
@@ -258,8 +267,8 @@ function MaintenanceManagement() {
                       variant="outlined"
                       color="error"
                       onClick={() => {
-                        setSelectedRecordId(record._id);
                         setOpenDeleteDialog(true);
+                        setSelectedRecordId(record._id);
                       }}
                     >
                       Delete
@@ -271,24 +280,11 @@ function MaintenanceManagement() {
           </CardContent>
         </Card>
 
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          onClick={() => navigate('/dashboard')}
-          sx={{ marginTop: 2, backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#115293' } }}
-        >
-          Go to Dashboard
-        </Button>
-
-        <Dialog
-          open={openDeleteDialog}
-          onClose={() => setOpenDeleteDialog(false)}
-        >
+        <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
           <DialogTitle>Delete Maintenance Record</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to delete this maintenance record? This action cannot be undone.
+              Are you sure you want to delete this maintenance record?
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -296,6 +292,21 @@ function MaintenanceManagement() {
             <Button onClick={handleDeleteMaintenance} color="error">Delete</Button>
           </DialogActions>
         </Dialog>
+
+        <Button
+          variant="contained"
+          fullWidth
+          sx={{
+            marginTop: 2,
+            backgroundColor: '#1976d2', // Primary color for consistency
+            '&:hover': { backgroundColor: '#115293' }, // Darker shade on hover
+            borderRadius: 2, // Match border radius to the Add Maintenance button
+          }}
+          onClick={() => navigate('/dashboard')}
+        >
+          Go to Dashboard
+        </Button>
+
       </Box>
     </Box>
   );
