@@ -25,10 +25,10 @@ app.use('/api/users', userRoutes);
 app.use('/api/maintenance', maintenanceRoutes); // Adjust the route path if needed
 
 // Log MongoDB URI for debugging (optional)
-console.log('MongoDB URI:', process.env.MONGO_URI);
+console.log('MongoDB URI:', "mongodb+srv://majmundarshlok06:shlok1234@cluster0.ig1ya.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect("mongodb+srv://majmundarshlok06:shlok1234@cluster0.ig1ya.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
