@@ -26,13 +26,26 @@ function Login() {
 
     try {
       const res = await axios.post('http://localhost:5000/api/users/login', { email, password });
-      login(res.data.token);
-      navigate('/dashboard');
+      
+      // Assuming the token is in res.data.token
+      const token = res.data.token;
+      login(token); // Call the login function to set the token in AuthContext
+
+      // Store the token in localStorage (or sessionStorage)
+      localStorage.setItem('token', token);
+
+      navigate('/dashboard'); // Redirect to the dashboard after login
     } catch (error) {
       if (error.response) {
-        setErrorMessage('Login failed. Please check your credentials.');
+        // Check for different error response codes
+        if (error.response.status === 401) {
+          setErrorMessage('Invalid credentials. Please try again.');
+        } else {
+          setErrorMessage('Login failed. Please try again.');
+        }
       } else {
         console.error('Unexpected error:', error);
+        setErrorMessage('An unexpected error occurred. Please try again later.');
       }
     }
   };

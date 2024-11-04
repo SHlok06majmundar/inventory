@@ -1,76 +1,73 @@
-// backend/controllers/userController.js
-const User = require('../models/User'); // Adjust the path as needed
-const bcrypt = require('bcryptjs');
+const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
-// Function to register a new user
-const registerUser = async (req, res) => {
+// Function to generate JWT token
+const generateToken = (userId) => {
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
+};
+
+// Register User
+exports.register = async (req, res) => {
   const { name, email, username, password } = req.body;
 
-  // Check for missing fields
-  if (!name || !email || !username || !password) {
-    return res.status(400).json({ message: 'All fields are required.' });
-  }
-
   try {
-    // Check if the user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists with this email.' });
-    }
-
-    // Check if the username already exists
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ message: 'Username already taken. Please choose a different one.' });
-    }
-
-    // Hash the password
+    // Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const newUser = await User.create({
+      name,
+      email,
+      username,
+      password: hashedPassword,
+    });
 
-    // Create a new user
-    const user = new User({ name, email, username, password: hashedPassword });
-    await user.save();
+    // Generate token after successful registration
+    const token = generateToken(newUser._id);
 
-    res.status(201).json({ message: 'User registered successfully!' });
+    res.status(201).json({ 
+      message: 'User registered successfully', 
+      token // Send token in the response
+    });
   } catch (error) {
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ message: error.message });
-    }
-    if (error.code === 11000) { // Duplicate key error
-      return res.status(400).json({ message: 'Username or email already exists. Please choose a different one.' });
-    }
-    console.error('Registration error:', error);
-    res.status(500).json({ message: 'An error occurred while registering.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error registering user' });
   }
 };
 
-// Function to log in a user
-const loginUser = async (req, res) => {
+// Login User
+exports.login = async (req, res) => {
   const { email, password } = req.body;
 
-  // Check for missing fields
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required.' });
-  }
-
   try {
-    // Find the user by email
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'User not found.' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Compare password with hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials.' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    res.status(200).json({ message: 'Login successful!' });
+    const token = generateToken(user._id);
+    res.json({ message: 'Login successful', token });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'An error occurred while logging in.' });
+    console.error(error);
+    res.status(500).json({ message: 'Error logging in' });
   }
 };
 
-module.exports = { registerUser, loginUser };
+// Middleware to protect routes
+exports.protect = async (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Not authorized' });
+  
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decoded.id);
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: 'Not authorized' });
+  }
+};

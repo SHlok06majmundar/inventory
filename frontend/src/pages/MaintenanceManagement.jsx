@@ -31,6 +31,7 @@ function MaintenanceManagement() {
   const [dateOfService, setDateOfService] = useState('');
   const [costOfService, setCostOfService] = useState(0);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRecordId, setSelectedRecordId] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -41,27 +42,38 @@ function MaintenanceManagement() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/products');
+        const res = await axios.get('http://localhost:5000/api/products', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+          },
+        });
         setProducts(res.data);
       } catch (error) {
-        console.error('Error fetching products:', error);
-        setMessage('Error fetching products: ' + (error.response?.data?.message || error.message));
+        handleError('fetching products', error);
       }
     };
 
     const fetchMaintenanceRecords = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/maintenance');
+        const res = await axios.get('http://localhost:5000/api/maintenance', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+          },
+        });
         setMaintenanceRecords(res.data);
       } catch (error) {
-        console.error('Error fetching maintenance records:', error);
-        setMessage('Error fetching maintenance records: ' + (error.response?.data?.message || error.message));
+        handleError('fetching maintenance records', error);
       }
     };
 
     fetchProducts();
     fetchMaintenanceRecords();
   }, []);
+
+  const handleError = (context, error) => {
+    console.error(`Error ${context}:`, error);
+    setError(`Error ${context}: ${error.response?.data?.message || error.message}`);
+  };
 
   const handleLogOrUpdateMaintenance = async () => {
     if (!selectedProduct || !serviceType || !dateOfService || !costOfService) {
@@ -78,53 +90,72 @@ function MaintenanceManagement() {
 
     try {
       if (isEditing) {
-        // Update existing record
-        await axios.put(`http://localhost:5000/api/maintenance/${selectedRecordId}`, maintenanceData);
+        await axios.put(`http://localhost:5000/api/maintenance/${selectedRecordId}`, maintenanceData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+          },
+        });
         setMessage('Maintenance record updated successfully.');
       } else {
-        // Log new maintenance record
         const existingRecord = maintenanceRecords.find(record => record.product._id === selectedProduct);
         if (existingRecord) {
           setMessage('Maintenance record for this product already exists. Edit it instead.');
           return;
         }
-        await axios.post('http://localhost:5000/api/maintenance', maintenanceData);
+        await axios.post('http://localhost:5000/api/maintenance', maintenanceData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+          },
+        });
         setMessage('Maintenance logged successfully.');
       }
 
-      setServiceType('');
-      setDateOfService('');
-      setCostOfService(0);
-      setIsEditing(false); // Reset editing state
-      // Refresh maintenance records after logging or updating
-      const res = await axios.get('http://localhost:5000/api/maintenance');
-      setMaintenanceRecords(res.data);
+      resetForm();
+      await refreshMaintenanceRecords();
     } catch (error) {
-      console.error('Error logging/updating maintenance:', error);
-      setMessage('Error logging/updating maintenance: ' + (error.response?.data?.message || error.message));
+      handleError('logging/updating maintenance', error);
     }
+  };
+
+  const resetForm = () => {
+    setSelectedProduct('');
+    setServiceType('');
+    setDateOfService('');
+    setCostOfService(0);
+    setIsEditing(false);
+    setError('');
+  };
+
+  const refreshMaintenanceRecords = async () => {
+    const res = await axios.get('http://localhost:5000/api/maintenance', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+      },
+    });
+    setMaintenanceRecords(res.data);
   };
 
   const handleEditMaintenance = (record) => {
     setSelectedRecordId(record._id);
     setSelectedProduct(record.product._id);
     setServiceType(record.serviceType);
-    setDateOfService(record.dateOfService.split('T')[0]); // Extract date only
+    setDateOfService(record.dateOfService.split('T')[0]);
     setCostOfService(record.costOfService);
-    setIsEditing(true); // Set editing mode
+    setIsEditing(true);
   };
 
   const handleDeleteMaintenance = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/maintenance/${selectedRecordId}`);
+      await axios.delete(`http://localhost:5000/api/maintenance/${selectedRecordId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the token
+        },
+      });
       setOpenDeleteDialog(false);
       setMessage('Maintenance record deleted successfully.');
-      // Refresh maintenance records after deletion
-      const res = await axios.get('http://localhost:5000/api/maintenance');
-      setMaintenanceRecords(res.data);
+      await refreshMaintenanceRecords();
     } catch (error) {
-      console.error('Error deleting maintenance record:', error);
-      setMessage('Error deleting maintenance record: ' + (error.response?.data?.message || error.message));
+      handleError('deleting maintenance record', error);
     }
   };
 
@@ -145,6 +176,7 @@ function MaintenanceManagement() {
       <Box sx={{ maxWidth: '500px', width: '100%', padding: 2 }}>
         <Typography variant="h4" align="center">Maintenance Management</Typography>
         {message && <Alert severity="info">{message}</Alert>}
+        {error && <Alert severity="error">{error}</Alert>}
         <Card sx={{ marginBottom: 2 }}>
           <CardContent>
             <FormControl fullWidth margin="normal">
@@ -204,8 +236,7 @@ function MaintenanceManagement() {
             </Button>
           </CardContent>
         </Card>
-        
-        {/* Displaying maintenance records */}
+
         <Card sx={{ marginBottom: 2 }}>
           <CardContent>
             <Typography variant="h6" align="center">Maintenance Records</Typography>
@@ -258,8 +289,10 @@ function MaintenanceManagement() {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDeleteDialog(false)} color="primary">Cancel</Button>
-            <Button onClick={handleDeleteMaintenance} color="error">Delete</Button>
+            <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+            <Button onClick={handleDeleteMaintenance} color="error">
+              Delete
+            </Button>
           </DialogActions>
         </Dialog>
       </Box>

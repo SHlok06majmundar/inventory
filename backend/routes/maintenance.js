@@ -1,14 +1,13 @@
 const express = require('express');
-const { createMaintenance, getMaintenances, deleteMaintenance, updateMaintenance } = require('../controllers/maintenanceController');
-
 const router = express.Router();
+const maintenanceController = require('../controllers/maintenanceController');
+const userController = require('../controllers/userController');
 
-router.route('/')
-  .post(createMaintenance)
-  .get(getMaintenances);
+router.use(userController.protect); // Protect all routes with authentication
 
-router.route('/:id')
-  .delete(deleteMaintenance)
-  .put(updateMaintenance); // Add this line to handle updates
+router.post('/', maintenanceController.createMaintenance);
+router.get('/', maintenanceController.getMaintenances);
+router.put('/:id', maintenanceController.updateMaintenance);
+router.delete('/:id', maintenanceController.deleteMaintenance);
 
 module.exports = router;

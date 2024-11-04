@@ -10,26 +10,43 @@ function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage(''); // Reset error message on submit
+    setSuccessMessage(''); // Reset success message
 
-    // Validate password length
-    if (password.length < 7) {
-      setErrorMessage('Password should be at least 7 characters.');
+    // Validate input fields
+    if (!name || !email || !username || password.length < 7) {
+      setErrorMessage('Please fill in all fields and ensure the password is at least 7 characters.');
       return; // Stop form submission if validation fails
     }
 
     try {
-      await axios.post('http://localhost:5000/api/users/register', { name, email, username, password });
-      // Redirect to the dashboard after successful registration
-      navigate('/dashboard');
+      const response = await axios.post('http://localhost:5000/api/users/register', {
+        name,
+        email,
+        username,
+        password,
+      });
+
+      // Assuming your registration returns a token
+      const token = response.data.token; // Ensure the response includes a token
+      localStorage.setItem('token', token); // Store the token in localStorage
+      
+      setSuccessMessage('Registration successful! Redirecting to dashboard...');
+      setTimeout(() => {
+        navigate('/dashboard'); // Redirect after a delay to show success message
+      }, 2000);
+      
     } catch (error) {
       if (error.response) {
+        // Server responded with an error
         setErrorMessage(error.response.data.message || 'An error occurred. Please try again.');
       } else {
+        // Network or other error
         console.error('Unexpected error:', error);
         setErrorMessage('Network error. Please try again.');
       }
@@ -100,6 +117,7 @@ function Register() {
                 required
               />
               {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+              {successMessage && <Alert severity="success">{successMessage}</Alert>}
               <Button
                 type="submit"
                 variant="contained"

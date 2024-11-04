@@ -1,50 +1,89 @@
-const Product = require('../models/Product');
+// controllers/productController.js
+const Product = require('../models/Product'); // Import the Product model
 
-exports.createProduct = async (req, res) => {
-  try {
-    const { name, price, quantity, category, purchaseDate, serialNumber } = req.body;
-    const image = req.file ? req.file.path : ''; // Assuming multer is handling image uploads
-
-    const product = await Product.create({
-      name, price, quantity, category, purchaseDate, serialNumber, image
-    });
-    return res.status(201).json({ product });
-  } catch (error) {
-    return res.status(400).json({ message: error.message });
-  }
-};
-
+// Get products for the logged-in user
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
-    res.status(200).json(products);
+    const products = await Product.find({ user: req.user._id });
+    res.json(products);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Failed to fetch products', error: error.message });
   }
 };
 
-exports.updateProduct = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updatedData = { ...req.body };
+// Create a new product
+exports.createProduct = async (req, res) => {
+  const { name, price, quantity, category, purchaseDate, serialNumber } = req.body;
+  const image = req.file ? req.file.path : null;
 
-    if (req.file) {
-      updatedData.image = req.file.path; // Update image if provided
+  // Validate required fields
+  if (!name || price == null || quantity == null) {
+    return res.status(400).json({
+      message: 'Name, price, and quantity are required fields.'
+    });
+  }
+
+  try {
+    const product = new Product({
+      name,
+      price,
+      quantity,
+      category,
+      purchaseDate,
+      serialNumber,
+      image,
+      user: req.user._id
+    });
+    await product.save();
+    res.status(201).json({ message: 'Product created successfully', product });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to create product', error: error.message });
+  }
+};
+
+// Update a product by ID
+exports.updateProduct = async (req, res) => {
+  const { id } = req.params;
+  const { name, price, quantity, category, purchaseDate, serialNumber } = req.body;
+  const image = req.file ? req.file.path : null;
+
+  // Validate required fields
+  if (!name || price == null || quantity == null) {
+    return res.status(400).json({
+      message: 'Name, price, and quantity are required fields.'
+    });
+  }
+
+  try {
+    const updatedProduct = await Product.findOneAndUpdate(
+      { _id: id, user: req.user._id },
+      { name, price, quantity, category, purchaseDate, serialNumber, image },
+      { new: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: 'Product not found or unauthorized' });
     }
 
-    const product = await Product.findByIdAndUpdate(id, updatedData, { new: true });
-    res.status(200).json(product);
+    res.json({ message: 'Product updated successfully', updatedProduct });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: 'Failed to update product', error: error.message });
   }
 };
 
+// Delete a product by ID
 exports.deleteProduct = async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const { id } = req.params;
-    await Product.findByIdAndDelete(id);
-    res.status(200).json({ message: 'Product deleted successfully' });
+    const deletedProduct = await Product.findOneAndDelete({ _id: id, user: req.user._id });
+
+    if (!deletedProduct) {
+      return res.status(404).json({ message: 'Product not found or unauthorized' });
+    }
+
+    res.json({ message: 'Product deleted successfully' });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: 'Failed to delete product', error: error.message });
   }
 };

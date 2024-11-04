@@ -1,3 +1,4 @@
+// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
@@ -10,18 +11,18 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors()); // Enable CORS
 app.use(express.json()); // Parse JSON bodies
 
 // Import routes
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
-const maintenanceRoutes = require('./routes/maintenance'); // Assuming the file is named 'maintenanceRoutes.js'
+const maintenanceRoutes = require('./routes/maintenance'); // Adjust to your file name if different
 
 // API Routes
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/maintenance', maintenanceRoutes); // Use maintenance routes here
+app.use('/api/maintenance', maintenanceRoutes); // Adjust the route path if needed
 
 // Log MongoDB URI for debugging (optional)
 console.log('MongoDB URI:', process.env.MONGO_URI);
