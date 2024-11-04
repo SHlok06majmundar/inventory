@@ -17,6 +17,7 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Avatar,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
@@ -149,6 +150,11 @@ function Dashboard() {
         }
     };
 
+    // Function to get image preview URL
+    const getImagePreview = (file) => {
+        return file ? URL.createObjectURL(file) : null;
+    };
+
     return (
         <Box
             sx={{
@@ -230,7 +236,22 @@ function Dashboard() {
                             type="file"
                             onChange={(e) => setNewProduct({ ...newProduct, image: e.target.files[0] })}
                         />
-                        <Button variant="contained" color="primary" onClick={editingProduct ? handleUpdateProduct : handleAddProduct}>
+                        
+                        {/* Display the uploaded image as an avatar */}
+                        {newProduct.image && (
+                            <Avatar
+                                alt={newProduct.name}
+                                src={getImagePreview(newProduct.image)}
+                                sx={{ width: 56, height: 56, marginTop: 2 }}
+                            />
+                        )}
+
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={editingProduct ? handleUpdateProduct : handleAddProduct}
+                            sx={{ marginTop: 2 }}
+                        >
                             {editingProduct ? 'Update Product' : 'Add Product'}
                         </Button>
                     </CardContent>
@@ -253,7 +274,6 @@ function Dashboard() {
                 <Button
                     variant="contained"
                     color="secondary"
-                    fullWidth
                     onClick={() => navigate('/maintenance-management')}
                     sx={{ marginTop: 2 }}
                 >
@@ -261,9 +281,9 @@ function Dashboard() {
                 </Button>
             </Box>
 
-            {/* Delete confirmation dialog */}
+            {/* Confirmation Dialog for Deleting a Product */}
             <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-                <DialogTitle>Confirm Deletion</DialogTitle>
+                <DialogTitle>Confirm Delete</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
                         Are you sure you want to delete this product?
@@ -271,7 +291,7 @@ function Dashboard() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-                    <Button onClick={handleDeleteProduct} color="primary">Delete</Button>
+                    <Button onClick={handleDeleteProduct} color="error">Delete</Button>
                 </DialogActions>
             </Dialog>
         </Box>
