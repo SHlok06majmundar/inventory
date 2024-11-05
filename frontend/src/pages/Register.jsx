@@ -20,7 +20,7 @@ function Register() {
 
     // Validate input fields
     if (!name || !email || !username || password.length < 7) {
-      setErrorMessage('Please fill in all fields and ensure the password is at least 7 characters.');
+      setErrorMessage('Please fill in all fields and ensure the password is at least 7 characters.(Thala For a Reason😎)');
       return; // Stop form submission if validation fails
     }
 
