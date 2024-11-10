@@ -1,5 +1,5 @@
-// controllers/productController.js
-const Product = require('../models/Product'); // Import the Product model
+
+const Product = require('../models/Product');
 
 // Get products for the logged-in user
 exports.getProducts = async (req, res) => {
